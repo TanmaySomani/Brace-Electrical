@@ -6,7 +6,7 @@ A builder queries an invoice. Accounts needs to locate the purchase order, compa
 
 A forward deployed engineering portfolio project: domain research, a business-specific UI, a persistent workflow, guarded automation and a reproducible local demo.
 
-![Brace Electrical claims desk](docs/claims-desk.png)
+![Brace Electrical claims desk](docs/img1.png)
 
 ## Try it locally — about two minutes
 
