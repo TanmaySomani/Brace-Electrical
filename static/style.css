@@ -508,10 +508,9 @@ p {
 .register-head,
 .claim-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(110px, 1fr) minmax(
-      65px,
-      0.55fr
-    ) 15px;
+  grid-template-columns:
+    minmax(0, 1.6fr) minmax(110px, 1fr) minmax(65px, 0.55fr)
+    15px;
   gap: 12px;
   align-items: center;
 }
@@ -1868,4 +1867,64 @@ form .primary {
     font-size: 9px;
     max-width: 100px;
   }
+}
+
+/* The assistant lives inside the claim file, beside its evidence and decisions. */
+.detail-tabs {
+  flex-wrap: wrap;
+}
+.claim-assistant {
+  padding-top: 20px;
+}
+.assistant-mode {
+  display: inline-block;
+  padding: 7px 10px;
+  background: #edf0e5;
+  font-size: 12px;
+}
+.question-prompts {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 22px;
+}
+.question-prompts button {
+  text-align: left;
+}
+#ask-form {
+  display: grid;
+  gap: 12px;
+}
+#claim-question {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  font: inherit;
+  border: 1px solid #cbd0c3;
+  background: #fffef9;
+  resize: vertical;
+}
+.assistant-answer {
+  margin-top: 22px;
+  border-top: 3px solid #dbe55b;
+  padding-top: 20px;
+}
+.assistant-answer h3 {
+  font-size: 17px;
+  line-height: 1.6;
+}
+.answer-finding {
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e2d9;
+}
+.source-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.assistant-answer li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+#assistant-result {
+  overflow-wrap: anywhere;
 }

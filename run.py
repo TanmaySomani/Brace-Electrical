@@ -39,7 +39,7 @@ def main():
     parser.add_argument(
         "--ai",
         action="store_true",
-        help="Use OpenAI classification (requires OPENAI_API_KEY and OPENAI_MODEL)",
+        help="Use OpenAI classification and claim assistance (requires OPENAI_API_KEY and OPENAI_MODEL)",
     )
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
@@ -68,7 +68,7 @@ def main():
         app.prepare()
         url = f"http://127.0.0.1:{args.port}"
         print(
-            f'\nBrace Electrical — claims desk\n  Open: {url}\n  Mode: {"OpenAI classification" if args.ai else "offline demo (no API calls)"}\n  Data: {app.DB}\n\nPress Ctrl+C to stop. No emails are sent.\n',
+            f'\nBrace Electrical — claims desk\n  Open: {url}\n  Mode: {"OpenAI classification + evidence assistant" if args.ai else "offline demo (no API calls)"}\n  Data: {app.DB}\n\nPress Ctrl+C to stop. No emails are sent.\n',
             flush=True,
         )
         if not args.no_browser:

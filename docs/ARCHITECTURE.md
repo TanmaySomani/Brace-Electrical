@@ -46,3 +46,7 @@ Unknown static paths are not served. Source files, secrets and the database cann
 `--ai` enables Chat Completions with the email subject/body treated as untrusted input. The JSON category is checked against an allowlist. Timeouts or invalid responses persist an error state. The optional live call is not covered by offline tests.
 
 [OpenAI API reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)
+
+## Evidence assistant extension
+
+See [SYSTEM-DESIGN.md](SYSTEM-DESIGN.md) for the current as-built architecture, request contracts, OpenAI boundaries, limitations and production roadmap. The new `assistant.py` module supports read-only, claim-scoped questions through `POST /api/cases/:id/ask`.

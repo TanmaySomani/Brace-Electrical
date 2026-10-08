@@ -76,6 +76,23 @@ class HTTPTests(unittest.TestCase):
             body="Please provide the purchase order.",
         )
 
+    def test_assistant_endpoint_returns_scoped_briefing(self):
+        _, state = self.request("/api/state")
+        case = next(c for c in state["cases"] if c["invoice_id"] == "INV-1043")
+        code, answer = self.request(
+            "/api/cases/" + case["id"] + "/ask",
+            {"question": "Explain the discrepancy", "version": case["version"]},
+        )
+        self.assertEqual(code, 200)
+        self.assertEqual(answer["mode"], "offline")
+        self.assertEqual(answer["case_id"], case["id"])
+        self.assertNotIn("INV-1042", json.dumps(answer))
+
+    def test_workflow_is_served(self):
+        code, html = self.request("/workflow")
+        self.assertEqual(code, 200)
+        self.assertIn(b"Brace Electrical", html)
+
     def test_state_contains_brand_jobs_and_scoped_evidence(self):
         code, data = self.request("/api/state")
         self.assertEqual(code, 200)

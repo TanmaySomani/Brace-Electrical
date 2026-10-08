@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/tanmaysomani/Documents/Ai automation /Brace-Electrical/docs/diagrams/claim-workflow.json",
+  "output": "/Users/tanmaysomani/Documents/Ai automation /Brace-Electrical/docs/diagrams/claim-workflow.html",
+  "specification": {
+    "sha256": "0478b3d744b3194faa3af1ac3772399d6478c2538b9e2afd16a08242f2a4687d",
+    "bytes": 3147
+  },
+  "artifact": {
+    "sha256": "7ef5f34aa75e0731502ddf40a66213273eac5ad574a9e408f649ed0f71a7b6b6",
+    "bytes": 807749
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

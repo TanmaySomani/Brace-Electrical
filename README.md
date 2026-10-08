@@ -116,3 +116,23 @@ GitHub Actions is configured for Linux, macOS and Windows with Python 3.10 and 3
 - Escalations are local tasks. Closing a query does not mark the invoice paid.
 
 This is a tested local prototype, not an internet-facing production service. Font licenses are in `static/fonts/`. The source is shared for review; no blanket open-source license has been assigned.
+
+## Ask the job file
+
+Each claim now has an **Ask the file** tab. It can explain discrepancies, identify missing evidence and prepare project-manager handovers with source links.
+
+The default mode shows a clearly labelled deterministic briefing. To enable custom OpenAI answers, configure `OPENAI_API_KEY` and `OPENAI_MODEL` in your terminal environment, then run:
+
+```bash
+python run.py --ai
+```
+
+Use a model available to your API project that supports Chat Completions, Responses and structured outputs. Credentials are read from environment variables, not from a browser form or an automatically loaded .env file. Keep keys out of Git and chat. API calls are billable; a fresh AI-mode database also classifies the six seed emails. Existing processed cases are preserved.
+
+The assistant sends your question and the selected claim’s records to OpenAI. It has no action tools. Citations open source snapshots; check them before using an answer. Provider failures show an explicit error. Offline operation remains available without a key.
+
+- [System design document](docs/SYSTEM-DESIGN.md)
+- [Interactive Archify workflow](docs/diagrams/claim-workflow.html) — download and open in a browser, or use **Workspace guide → Explore the interactive workflow** while running locally.
+- [Diagram delivery receipt](docs/diagrams/delivery-receipt.json)
+
+AI integration tests mock provider responses. Live model quality has not been verified without locally configured credentials.

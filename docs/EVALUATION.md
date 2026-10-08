@@ -22,3 +22,7 @@ No measured production ROI, time saving, collection uplift or general model accu
 ## Production work
 
 Trusted mailbox ingestion, tenant authentication and roles; accounting/job-management connectors; PDF extraction and approval provenance; immutable evidence versions; durable workers and monitoring; real email delivery with exact-content approval, reconciliation and idempotency; ownership, follow-ups and notifications; retention, backups, accessibility testing and security review.
+
+## Evidence assistant extension
+
+The suite now includes provider-contract mocks, unknown citation rejection, incomplete output handling, secret-safe provider errors, live-ledger rereads, stale request rejection, scoped context, offline no-network behavior and HTTP route checks. These validate code boundaries; they do not measure live model accuracy. See SYSTEM-DESIGN.md for the proposed pilot evaluation.

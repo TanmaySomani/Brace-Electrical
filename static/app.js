@@ -43,6 +43,8 @@ let state = { cases: [], outbox: [], projects: {} },
   detailTab = "evidence",
   busy = false;
 const edits = new Map();
+const answers = new Map();
+const questions = new Map();
 const status = (c) =>
   `<span class="status ${esc(c.status)}">${esc(labels[c.status])}</span>`;
 const daysLate = (c) =>
@@ -212,8 +214,46 @@ function renderDetail() {
   const inv = c.result?.invoice,
     p = c.project;
   $("#detail").innerHTML =
-    `<button class="mobile-back text-button" data-back>← Back to claim register</button><div class="detail-top"><span class="job-code">${esc(p?.code || "JOB UNMATCHED")} / CLAIM FILE</span>${status(c)}</div><h2>${esc(p?.name || "Builder query")}</h2><div class="project-subtitle">${esc(p?.stage || c.sender)}</div><div class="claim-summary"><div><strong>${inv ? money(inv.amount) : "—"}</strong><small>${esc(c.invoice_id || "Invoice match pending")} · AUD before tax</small></div><div><b>${inv ? "Due " + shortDate(inv.due) : "Needs review"}</b><small>${esc(inv?.customer || "No builder match")}</small></div></div><div class="detail-tabs" role="group" aria-label="Claim file sections"><button class="detail-tab ${detailTab === "evidence" ? "active" : ""}" data-detail="evidence" aria-pressed="${detailTab === "evidence"}">Evidence</button><button class="detail-tab ${detailTab === "message" ? "active" : ""}" data-detail="message" aria-pressed="${detailTab === "message"}">Builder email</button><button class="detail-tab ${detailTab === "history" ? "active" : ""}" data-detail="history" aria-pressed="${detailTab === "history"}">History <span>${c.audit.length}</span></button></div><div id="detail-content">${detailTab === "evidence" ? evidence(c) : detailTab === "message" ? message(c) : history(c)}</div>${actions(c)}<div class="detail-engine">${esc(c.result?.engine || state.engine)} · Scoped record checks<br>Demo job records. No external actions.</div>`;
+    `<button class="mobile-back text-button" data-back>← Back to claim register</button><div class="detail-top"><span class="job-code">${esc(p?.code || "JOB UNMATCHED")} / CLAIM FILE</span>${status(c)}</div><h2>${esc(p?.name || "Builder query")}</h2><div class="project-subtitle">${esc(p?.stage || c.sender)}</div><div class="claim-summary"><div><strong>${inv ? money(inv.amount) : "—"}</strong><small>${esc(c.invoice_id || "Invoice match pending")} · AUD before tax</small></div><div><b>${inv ? "Due " + shortDate(inv.due) : "Needs review"}</b><small>${esc(inv?.customer || "No builder match")}</small></div></div><div class="detail-tabs" role="group" aria-label="Claim file sections"><button class="detail-tab ${detailTab === "evidence" ? "active" : ""}" data-detail="evidence" aria-pressed="${detailTab === "evidence"}">Evidence</button><button class="detail-tab ${detailTab === "message" ? "active" : ""}" data-detail="message" aria-pressed="${detailTab === "message"}">Builder email</button><button class="detail-tab ${detailTab === "history" ? "active" : ""}" data-detail="history" aria-pressed="${detailTab === "history"}">History <span>${c.audit.length}</span></button><button class="detail-tab ${detailTab === "assistant" ? "active" : ""}" data-detail="assistant" aria-pressed="${detailTab === "assistant"}">Ask the file</button></div><div id="detail-content">${detailTab === "evidence" ? evidence(c) : detailTab === "message" ? message(c) : detailTab === "assistant" ? assistantPanel(c) : history(c)}</div>${actions(c)}<div class="detail-engine">${esc(c.result?.engine || state.engine)} · Scoped record checks<br>Demo job records. No external actions.</div>`;
 }
+
+function assistantPanel(c) {
+  const a = answers.get(c.id);
+  const valid = a && a.version === c.version;
+  return `<section class="claim-assistant"><div class="eyebrow">ACCOUNTS / EVIDENCE DESK</div><h3>A second look at the job file.</h3><p>Explain a discrepancy, prepare a site handover, or identify what is missing.</p><p class="assistant-mode">${state.assistant_enabled ? "OpenAI connected · selected claim only" : "Offline · evidence briefing available"}</p><div class="question-prompts"><button class="text-button" data-question="Explain the discrepancy and show the supporting evidence.">Explain the discrepancy ↗</button><button class="text-button" data-question="What evidence is missing and who should provide it?">What is missing? ↗</button><button class="text-button" data-question="Prepare a concise handover for the project manager with facts, open questions and next steps.">Prepare a site handover ↗</button></div><form id="ask-form"><label for="claim-question">Question about ${esc(c.invoice_id || "this claim")}</label><textarea id="claim-question" maxlength="2000" required rows="3" placeholder="Which hours are unsupported by the signed docket?">${esc(questions.get(c.id) || "")}</textarea><button class="button primary" type="submit" ${!c.invoice_id ? "disabled" : ""}>${state.assistant_enabled ? "Ask the job file" : "Show evidence briefing"} <span aria-hidden="true">↗</span></button></form><p class="hint">${state.assistant_enabled ? "Your question and this claim’s records are sent to OpenAI. Check findings against the sources before acting." : "Custom AI answers require OPENAI_API_KEY, OPENAI_MODEL and python run.py --ai. The briefing below uses fixed record checks."}</p><div id="assistant-result" aria-live="polite">${valid ? answerHtml(a) : a ? "<p class='hint'>The claim changed. Ask again for an updated answer.</p>" : ""}</div></section>`;
+}
+function answerHtml(a) {
+  return `<article class="assistant-answer"><div class="eyebrow">${a.mode === "openai" ? "OPENAI / REVIEW BEFORE USE" : "DETERMINISTIC / EVIDENCE BRIEFING"}</div><h3>${esc(a.summary)}</h3>${a.findings.map((f) => `<div class="answer-finding"><p>${esc(f.text)}</p><div class="source-links">${f.sources.map((id) => `<button class="text-button" data-answer-source="${esc(id)}">${esc(id)} ↗</button>`).join("")}</div></div>`).join("")}<h4>Suggested next steps</h4><ul>${a.next_steps.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>${a.limitations.length ? `<h4>Limits of this answer</h4><ul>${a.limitations.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}<p class="hint">No approval, ledger update or message delivery performed.${a.usage.total_tokens ? " · " + a.usage.total_tokens + " tokens" : ""}</p></article>`;
+}
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "ask-form") return;
+  e.preventDefault();
+  remember();
+  if (busy) return;
+  const c = current(),
+    question = $("#claim-question").value;
+  questions.set(c.id, question);
+  busy = true;
+  const button = e.target.querySelector("button");
+  button.disabled = true;
+  $("#assistant-result").textContent = state.assistant_enabled
+    ? "Reading this claim’s records…"
+    : "Preparing the evidence briefing…";
+  try {
+    const answer = await api(`/api/cases/${c.id}/ask`, {
+      question,
+      version: c.version,
+    });
+    answers.set(c.id, answer);
+    state = await api("/api/state");
+    renderDetail();
+  } catch (error) {
+    $("#assistant-result").textContent = error.message;
+  } finally {
+    busy = false;
+    button.disabled = false;
+  }
+});
 function evidence(c) {
   const r = c.result;
   if (!r)
@@ -312,7 +352,7 @@ function renderSecondary() {
     target.innerHTML = `<div class="panel-shell"><div class="panel"><div class="secondary-heading"><h2>Job correspondence & decisions</h2><p>The complete workspace trail. Times shown in your local timezone.</p></div><div class="timeline">${events.map((a) => `<div class="event"><b>${esc(a.event)}</b> · ${esc(a.project)}<span>${esc(a.detail)}</span><time>${new Date(a.created_at).toLocaleString("en-AU")}</time></div>`).join("") || "<p>No activity recorded yet.</p>"}</div></div></div>`;
   }
   if (view === "about")
-    target.innerHTML = `<div class="guide-layout"><div class="panel-shell"><section class="panel"><div class="eyebrow">THE BUSINESS</div><h2>Brace Electrical</h2><p>A fictional electrical subcontractor delivering commercial fit-outs across Brisbane and South East Queensland. Kate manages accounts; site leads hold the job context.</p><div class="swatches" aria-label="Brand palette: ink, safety yellow, workpaper green and off-white"><span></span><span></span><span></span><span></span></div><div class="guide-block"><h3>The operational problem</h3><p>A completed job can still have an unpaid invoice. A builder asks for a PO, a signed labour docket, or a priced variation approval. Accounts has to reconstruct the paper trail before responding.</p></div><div class="guide-block"><h3>Research that informed this design</h3><p>ASBFEO identifies unpaid variations as one cause of delays to subcontractor payments. QBCC’s monies-owed process asks for invoices, agreements and correspondence as evidence. This desk organises those records; it does not determine legal entitlement or statutory deadlines.</p><a class="research-link" href="https://www.asbfeo.gov.au/sites/default/files/2024-08/ASBFEO%20Procurement%20Inquiry%20Report_FINAL%20%281%29.pdf" target="_blank" rel="noreferrer">ASBFEO · Procurement Inquiry Report, 2024 ↗</a><a class="research-link" href="https://www.qbcc.qld.gov.au/ton/node/431" target="_blank" rel="noreferrer">QBCC · Monies owed complaint and evidence requirements ↗</a></div><div class="guide-block"><h3>Designed for the accounts-to-site handover</h3><p>Jobs and builders lead the register. Invoice-versus-docket comparisons expose discrepancies. Source records stay one click away. Replies require approval, and uncertain claims go back to a person.</p></div></section></div><div class="panel-shell"><section class="panel"><div class="eyebrow">WORKSPACE STATUS</div><h2>A local working prototype.</h2><div class="guide-block"><h3>Classification: ${esc(state.engine)}</h3><p>Set OPENAI_API_KEY and OPENAI_MODEL, then launch with python run.py --ai to classify new emails with a model. Otherwise the app uses explicit demo rules. Drafts use verified source records.</p></div><div class="guide-block"><h3>Connected here</h3><p>Six synthetic invoices, five jobs, signed labour dockets, purchase order records, a site instruction and builder queries. The local database persists decisions and approved replies.</p></div><div class="guide-block"><h3>Not connected yet</h3><p>Live mailbox, accounting ledger, source document upload, external email delivery and team authentication. Escalations are recorded locally. No actual contractor, builder, employee or project is represented.</p></div><div class="guide-block"><h3>Read the money correctly</h3><p>Values are before tax, taken from a fixed demo ledger dated 8 October 2026. Open-query value is not recovered revenue. Closing a query does not update payment status.</p></div><div class="lifecycle"><span>Builder query</span><span>Job match</span><span>Record check</span><span>Human review</span><span>Approved reply</span></div></section></div></div>`;
+    target.innerHTML = `<div class="guide-layout"><div class="panel-shell"><section class="panel"><div class="eyebrow">THE BUSINESS</div><h2>Brace Electrical</h2><p>A fictional electrical subcontractor delivering commercial fit-outs across Brisbane and South East Queensland. Kate manages accounts; site leads hold the job context.</p><div class="swatches" aria-label="Brand palette: ink, safety yellow, workpaper green and off-white"><span></span><span></span><span></span><span></span></div><div class="guide-block"><h3>The operational problem</h3><p>A completed job can still have an unpaid invoice. A builder asks for a PO, a signed labour docket, or a priced variation approval. Accounts has to reconstruct the paper trail before responding.</p></div><div class="guide-block"><h3>Research that informed this design</h3><p>ASBFEO identifies unpaid variations as one cause of delays to subcontractor payments. QBCC’s monies-owed process asks for invoices, agreements and correspondence as evidence. This desk organises those records; it does not determine legal entitlement or statutory deadlines.</p><a class="research-link" href="https://www.asbfeo.gov.au/sites/default/files/2024-08/ASBFEO%20Procurement%20Inquiry%20Report_FINAL%20%281%29.pdf" target="_blank" rel="noreferrer">ASBFEO · Procurement Inquiry Report, 2024 ↗</a><a class="research-link" href="https://www.qbcc.qld.gov.au/ton/node/431" target="_blank" rel="noreferrer">QBCC · Monies owed complaint and evidence requirements ↗</a></div><div class="guide-block"><h3>Designed for the accounts-to-site handover</h3><p>Jobs and builders lead the register. Invoice-versus-docket comparisons expose discrepancies. Source records stay one click away. Replies require approval, and uncertain claims go back to a person.</p></div></section></div><div class="panel-shell"><section class="panel"><div class="eyebrow">WORKSPACE STATUS</div><h2>A local working prototype.</h2><div class="guide-block"><h3>Classification: ${esc(state.engine)}</h3><p>Set OPENAI_API_KEY and OPENAI_MODEL, then launch with python run.py --ai to classify new emails with a model. Otherwise the app uses explicit demo rules. Drafts use verified source records.</p></div><div class="guide-block"><h3>System walkthrough</h3><p><a class="research-link" href="/workflow" target="_blank" rel="noreferrer">Explore the interactive workflow ↗</a></p></div><div class="guide-block"><h3>Connected here</h3><p>Six synthetic invoices, five jobs, signed labour dockets, purchase order records, a site instruction and builder queries. The local database persists decisions and approved replies.</p></div><div class="guide-block"><h3>Not connected yet</h3><p>Live mailbox, accounting ledger, source document upload, external email delivery and team authentication. Escalations are recorded locally. No actual contractor, builder, employee or project is represented.</p></div><div class="guide-block"><h3>Read the money correctly</h3><p>Values are before tax, taken from a fixed demo ledger dated 8 October 2026. Open-query value is not recovered revenue. Closing a query does not update payment status.</p></div><div class="lifecycle"><span>Builder query</span><span>Job match</span><span>Record check</span><span>Human review</span><span>Approved reply</span></div></section></div></div>`;
 }
 function download(text, name, type) {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -332,6 +372,7 @@ function showDocument(id) {
 }
 document.addEventListener("input", (e) => {
   if (["note", "draft"].includes(e.target.id)) remember();
+  if (e.target.id === "claim-question") questions.set(selected, e.target.value);
 });
 document.addEventListener("click", async (e) => {
   const b = e.target.closest("button");
@@ -361,6 +402,21 @@ document.addEventListener("click", async (e) => {
     renderDetail();
   }
   if (b.dataset.document) showDocument(b.dataset.document);
+  if (b.dataset.question) {
+    $("#claim-question").value = b.dataset.question;
+    questions.set(selected, b.dataset.question);
+    $("#claim-question").focus();
+  }
+  if (b.dataset.answerSource) {
+    const source = answers
+      .get(selected)
+      ?.sources.find((s) => s.id === b.dataset.answerSource);
+    if (source) {
+      $("#document-content").innerHTML =
+        `<article class="document-paper"><h2 id="document-title">${esc(source.title)}</h2><p class="job-code">${esc(source.id)} · source snapshot used for this answer</p><p>${esc(source.body)}</p></article>`;
+      $("#document-dialog").showModal();
+    }
+  }
   if (b.hasAttribute("data-back"))
     $("#case-list").scrollIntoView({
       behavior: matchMedia("(prefers-reduced-motion:reduce)").matches

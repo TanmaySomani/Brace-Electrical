@@ -1,5 +1,6 @@
 """Brace Electrical: local claim review pipeline. Python standard library only."""
 import json
+import assistant
 import os
 import re
 import sqlite3
@@ -416,6 +417,78 @@ def act(cid, action, data):
             raise ValueError("Unknown action")
 
 
+def ask(cid, data):
+    question = data.get("question")
+    if not isinstance(question, str) or not 1 <= len(question.strip()) <= 2000:
+        raise ValueError("Enter a question of 1–2000 characters")
+    with connect() as db:
+        case = db.execute("SELECT * FROM cases WHERE id=?", (cid,)).fetchone()
+        if not case:
+            raise ValueError("Case not found")
+        if data.get("version") != case["version"]:
+            raise ValueError("Case changed. Refresh before asking.")
+        if not case["invoice_id"] or not case["category"]:
+            raise ValueError("A verified invoice match is required before asking.")
+        case = dict(case)
+        invoices = [
+            dict(r)
+            for r in db.execute(
+                "SELECT * FROM invoices WHERE id=? AND lower(email)=lower(?)",
+                (case["invoice_id"], case["sender"]),
+            )
+        ]
+        docs = [
+            dict(r)
+            for r in db.execute(
+                "SELECT * FROM documents WHERE invoice_id=? AND customer IN (SELECT customer FROM invoices WHERE id=?)",
+                (case["invoice_id"], case["invoice_id"]),
+            )
+        ]
+        decision, _ = analyse(
+            case, invoices, docs, case["category"], "Current record check"
+        )
+        if not decision["invoice"]:
+            raise ValueError("Invoice match no longer valid. Manual review required.")
+        sources = [
+            {"id": d["id"], "title": d["title"], "body": d["body"]}
+            for d in decision["evidence"]
+        ]
+        sources += [
+            {
+                "id": "EMAIL",
+                "title": "Builder email (unverified assertions)",
+                "body": case["subject"] + "\n" + case["body"],
+            },
+            {
+                "id": "CHECKS",
+                "title": "Current deterministic checks",
+                "body": "\n".join(c["text"] for c in decision["checks"])
+                + "\nNext: "
+                + decision["action"],
+            },
+        ]
+        context = {
+            "invoice_id": case["invoice_id"],
+            "status": case["status"],
+            "sources": sources,
+            "decision": {"action": decision["action"], "checks": decision["checks"]},
+        }
+        if len(json.dumps(context)) > 35000:
+            raise ValueError("Claim context exceeds the assistant limit.")
+    result = assistant.answer(question.strip(), context)
+    with connect() as db:
+        latest = db.execute("SELECT version FROM cases WHERE id=?", (cid,)).fetchone()
+        if latest["version"] != case["version"]:
+            raise ValueError("Case changed while answering. Refresh and ask again.")
+        audit(
+            db,
+            cid,
+            "Evidence assistant used",
+            "Read-only " + result["mode"] + " briefing; no claim action taken.",
+        )
+    return {**result, "sources": sources, "case_id": cid, "version": case["version"]}
+
+
 def snapshot():
     with connect() as db:
         cases = []
@@ -441,6 +514,7 @@ def snapshot():
             and os.environ.get("OPENAI_API_KEY")
             and os.environ.get("OPENAI_MODEL")
             else "Rules-based demo",
+            "assistant_enabled": assistant.enabled(),
             "synthetic": True,
             "business": "Brace Electrical",
             "as_of": "2026-10-08",
@@ -449,7 +523,7 @@ def snapshot():
 
 
 class Handler(BaseHTTPRequestHandler):
-    def respond(self, code, data, kind="application/json"):
+    def respond(self, code, data, kind="application/json", diagram=False):
         raw = json.dumps(data).encode() if kind == "application/json" else data
         self.send_response(code)
         self.send_header("Content-Type", kind)
@@ -458,12 +532,23 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'",
+            (
+                "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-ancestors 'none'"
+                if diagram
+                else "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+            ),
         )
         self.end_headers()
         self.wfile.write(raw)
 
     def do_GET(self):
+        if self.path == "/workflow":
+            return self.respond(
+                200,
+                (ROOT / "docs/diagrams/claim-workflow.html").read_bytes(),
+                "text/html; charset=utf-8",
+                diagram=True,
+            )
         if self.path == "/api/state":
             return self.respond(200, snapshot())
         files = {
@@ -511,12 +596,14 @@ class Handler(BaseHTTPRequestHandler):
                 process(cid)
             else:
                 match = re.fullmatch(
-                    r"/api/cases/([a-f0-9]{12})/(approve|escalate|resolve|retry)",
+                    r"/api/cases/([a-f0-9]{12})/(approve|escalate|resolve|retry|ask)",
                     self.path,
                 )
                 if not match:
                     return self.respond(404, {"error": "Not found"})
                 cid, action = match.groups()
+                if action == "ask":
+                    return self.respond(200, ask(cid, data))
                 if action == "retry":
                     process(cid)
                 else:

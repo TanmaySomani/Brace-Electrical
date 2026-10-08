@@ -1,0 +1,161 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Brace Electrical \u00b7 Claim intelligence",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "lanes": [
+    {
+      "id": "review",
+      "label": "Claim review"
+    },
+    {
+      "id": "assist",
+      "label": "Evidence assistant"
+    }
+  ],
+  "mainPath": [
+    "intake",
+    "match",
+    "checks",
+    "reviewer",
+    "outbox"
+  ],
+  "nodes": [
+    {
+      "id": "intake",
+      "lane": "review",
+      "col": 0,
+      "type": "frontend",
+      "label": "Builder email",
+      "sublabel": "Idempotent intake"
+    },
+    {
+      "id": "match",
+      "lane": "review",
+      "col": 1,
+      "type": "backend",
+      "label": "Match account",
+      "sublabel": "Sender + invoice"
+    },
+    {
+      "id": "checks",
+      "lane": "review",
+      "col": 2,
+      "type": "security",
+      "label": "Check records",
+      "sublabel": "Rules + arithmetic"
+    },
+    {
+      "id": "reviewer",
+      "lane": "review",
+      "col": 3,
+      "type": "frontend",
+      "label": "Human review",
+      "sublabel": "Approve or refer"
+    },
+    {
+      "id": "outbox",
+      "lane": "review",
+      "col": 4,
+      "type": "database",
+      "label": "Test outbox",
+      "sublabel": "No email delivery"
+    },
+    {
+      "id": "question",
+      "lane": "assist",
+      "col": 0,
+      "type": "frontend",
+      "label": "Claim question",
+      "sublabel": "Local reviewer"
+    },
+    {
+      "id": "context",
+      "lane": "assist",
+      "col": 1,
+      "type": "database",
+      "label": "Scoped records",
+      "sublabel": "Live invoice + docs"
+    },
+    {
+      "id": "model",
+      "lane": "assist",
+      "col": 2,
+      "type": "cloud",
+      "label": "OpenAI API",
+      "sublabel": "Optional \u00b7 read only"
+    },
+    {
+      "id": "validate",
+      "lane": "assist",
+      "col": 3,
+      "type": "security",
+      "label": "Check answer",
+      "sublabel": "Schema + source IDs"
+    },
+    {
+      "id": "answer",
+      "lane": "assist",
+      "col": 4,
+      "type": "frontend",
+      "label": "Cited answer",
+      "sublabel": "Review against sources"
+    }
+  ],
+  "edges": [
+    {
+      "from": "intake",
+      "to": "match"
+    },
+    {
+      "from": "match",
+      "to": "checks"
+    },
+    {
+      "from": "checks",
+      "to": "reviewer"
+    },
+    {
+      "from": "reviewer",
+      "to": "outbox",
+      "label": "Approved"
+    },
+    {
+      "from": "question",
+      "to": "context"
+    },
+    {
+      "from": "context",
+      "to": "model"
+    },
+    {
+      "from": "model",
+      "to": "validate"
+    },
+    {
+      "from": "validate",
+      "to": "answer"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Decisions stay with people",
+      "items": [
+        "Disputes and missing approvals go to project leads.",
+        "Closing a case never marks an invoice paid."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Evidence before inference",
+      "items": [
+        "No key: deterministic evidence briefing.",
+        "Provider failure: explicit error; no silent model substitute."
+      ]
+    }
+  ]
+}
