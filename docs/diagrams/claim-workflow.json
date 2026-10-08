@@ -30,7 +30,8 @@
       "col": 0,
       "type": "frontend",
       "label": "Builder email",
-      "sublabel": "Idempotent intake"
+      "sublabel": "Idempotent intake",
+      "width": 180
     },
     {
       "id": "match",
@@ -38,7 +39,8 @@
       "col": 1,
       "type": "backend",
       "label": "Match account",
-      "sublabel": "Sender + invoice"
+      "sublabel": "Sender + invoice",
+      "width": 180
     },
     {
       "id": "checks",
@@ -46,7 +48,8 @@
       "col": 2,
       "type": "security",
       "label": "Check records",
-      "sublabel": "Rules + arithmetic"
+      "sublabel": "Rules + arithmetic",
+      "width": 180
     },
     {
       "id": "reviewer",
@@ -54,7 +57,8 @@
       "col": 3,
       "type": "frontend",
       "label": "Human review",
-      "sublabel": "Approve or refer"
+      "sublabel": "Approve or refer",
+      "width": 180
     },
     {
       "id": "outbox",
@@ -62,7 +66,8 @@
       "col": 4,
       "type": "database",
       "label": "Test outbox",
-      "sublabel": "No email delivery"
+      "sublabel": "No email delivery",
+      "width": 180
     },
     {
       "id": "question",
@@ -70,7 +75,8 @@
       "col": 0,
       "type": "frontend",
       "label": "Claim question",
-      "sublabel": "Local reviewer"
+      "sublabel": "Local reviewer",
+      "width": 180
     },
     {
       "id": "context",
@@ -78,7 +84,8 @@
       "col": 1,
       "type": "database",
       "label": "Scoped records",
-      "sublabel": "Live invoice + docs"
+      "sublabel": "Live invoice + docs",
+      "width": 180
     },
     {
       "id": "model",
@@ -86,7 +93,8 @@
       "col": 2,
       "type": "cloud",
       "label": "OpenAI API",
-      "sublabel": "Optional \u00b7 read only"
+      "sublabel": "Optional \u00b7 read only",
+      "width": 180
     },
     {
       "id": "validate",
@@ -94,7 +102,8 @@
       "col": 3,
       "type": "security",
       "label": "Check answer",
-      "sublabel": "Schema + source IDs"
+      "sublabel": "Schema + source IDs",
+      "width": 180
     },
     {
       "id": "answer",
@@ -102,7 +111,8 @@
       "col": 4,
       "type": "frontend",
       "label": "Cited answer",
-      "sublabel": "Review against sources"
+      "sublabel": "Review against sources",
+      "width": 180
     }
   ],
   "edges": [

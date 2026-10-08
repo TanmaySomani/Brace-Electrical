@@ -1,16 +1,53 @@
 # Brace Electrical
+## Less time chasing paperwork. A clearer path to payment.
 
-**A working claims desk for a fictional Brisbane electrical subcontractor.**
+I built Brace to help electrical contractors resolve the paperwork that holds up payment after the work is done.
 
-A builder queries an invoice. Accounts needs to locate the purchase order, compare the signed labour docket, or ask the project manager for variation approval. Brace brings the job records, discrepancy and next action into one review screen.
+When a builder questions an invoice, your accounts team needs more than a reminder to follow up. They need the right purchase order, a signed labour docket, an approved variation and a clear understanding of what still needs checking. Brace brings those records into one job file and helps your team prepare the next response.
 
-A forward deployed engineering portfolio project: domain research, a business-specific UI, a persistent workflow, guarded automation and a reproducible local demo.
+**My proposal: give accounts and site teams one place to turn a builder query into an evidence-backed decision.**
 
 ![Brace Electrical claims desk](docs/img1.png)
 
-## Try it locally — about two minutes
+## What this would do for your business
 
-**Requires Python 3.10+ only.** No npm install, database server, account, API key or paid service is needed. Fonts and assets are included locally.
+| When your team faces… | Brace helps them… |
+| --- | --- |
+| A builder asking for a missing PO | Locate the matching record and prepare a reply for approval |
+| Labour hours disputed against a signed docket | See the difference in hours and value, with the source beside it |
+| A variation without price approval | Identify the missing approval and refer the issue to the project lead |
+| A payment claimed but not confirmed | Route the query to finance without assuming the invoice is paid |
+| A difficult handover between accounts and site | Explain the evidence, open questions and next step in one claim file |
+
+The intended benefit is less time reconstructing the job history and fewer replies based on incomplete records. A pilot would measure those outcomes against your current process; I am not claiming proven savings or recovered revenue.
+
+## How the workflow works
+
+![Brace claim review and evidence assistant workflow](docs/diagrams/workflow-preview.png)
+
+[Open the interactive Archify workflow](docs/diagrams/claim-workflow.html). Download the HTML and open it in your browser, or select **Workspace guide → Explore the interactive workflow** while running the app.
+
+1. **Capture the builder’s query.** Save the correspondence and prevent duplicate intake events.
+2. **Find the right claim.** Match the sender and invoice, then retrieve the associated records.
+3. **Check the evidence.** Verify arithmetic and surface missing or conflicting documents.
+4. **Prepare the next step.** Review a grounded reply or ask the evidence assistant for an explanation.
+5. **Keep the decision with your team.** Approve a reply, refer a question to site or finance, and retain the decision history.
+
+The assistant can explain a discrepancy, identify missing evidence and prepare a project-manager handover. Its answers include source links for review. It cannot approve a claim, update the ledger or send a message.
+
+## See it with a realistic claim
+
+Open **Woolloongabba Medical / INV-1043**. The invoice bills **42 hours**, while the signed docket approves **36 hours**. At AUD 150 per hour, Brace shows a **six-hour / AUD 900 difference** and keeps the reply blocked for review.
+
+Open the signed docket, use **Ask the file**, and add a note for the project manager. The evidence and referral remain together in the claim history.
+
+Then open **Newstead Exchange / INV-1042**. A matching PO is available, so you can review the draft and approve it into the local outbox. **Approved replies are saved locally; no external email is sent.**
+
+The demonstration includes six builder queries across five jobs, covering purchase orders, invoice copies, labour disputes, variations and payment reconciliation.
+
+## Try the demonstration
+
+**Python 3.10+ is the only requirement.** No package installation, database server or API key is needed for the offline demonstration.
 
 ```sh
 git clone https://github.com/TanmaySomani/Brace-Electrical.git
@@ -18,121 +55,66 @@ cd Brace-Electrical
 python3 run.py
 ```
 
-On Windows, use `py -3 run.py` instead of `python3 run.py`.
+On Windows, use `py -3 run.py`. Your browser opens at **http://127.0.0.1:8765**. Stop the server with **Ctrl+C**.
 
-Your browser opens at **http://127.0.0.1:8765**. Six synthetic builder queries are seeded automatically. Stop with **Ctrl+C**.
+If you received a ZIP, extract it, open a terminal in the folder containing `run.py`, and run the same command.
 
-- Port occupied? `python3 run.py --port 8766`
-- Fresh demo without changing saved work? `python3 run.py --fresh-demo`
-- Open the browser manually? `python3 run.py --no-browser`
+| Option | Command |
+| --- | --- |
+| Start a temporary demonstration without changing saved work | `python3 run.py --fresh-demo` |
+| Use another port | `python3 run.py --port 8766` |
+| Open the browser yourself | `python3 run.py --no-browser` |
 
-If you downloaded a ZIP, extract it and open a terminal in the folder containing `run.py`. Run the same command. Local decisions persist in `.local/brace.sqlite3`, which Git ignores.
+Local decisions persist in `.local/brace.sqlite3`. That database is excluded from Git.
 
-## Recruiter walkthrough — five minutes
+## Enable OpenAI assistance
 
-| Try this                                         | What to look for                                                                                                      |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| **Woolloongabba Medical / INV-1043**             | The invoice bills 42 hours; the signed docket approves 36. A six-hour / AUD 900 difference blocks reply approval.     |
-| Open **LD-238-17** in Job records                | The source viewer carries the job, builder and invoice associated with the evidence.                                  |
-| Add a note, then **Refer to project manager**    | A local task and audit entry persist. No notification is sent.                                                        |
-| **Newstead Exchange / INV-1042**                 | A matching PO is available. Review the draft and choose **Approve reply**.                                            |
-| **Approved replies**                             | The exact approved text is saved. Download an `.eml` draft; the app does not send it.                                 |
-| **Paddington Retail / INV-1047**                 | A site instruction and signed docket exist, but variation price approval is missing. The decision stays with a human. |
-| **Eagle Farm Logistics / INV-1045**              | A customer's claim of payment does not mark the ledger paid.                                                          |
-| **Job register**, search and **Export register** | Navigate by site and export a CSV of the case register.                                                               |
-
-To try intake, click **Log builder query**:
-
-```text
-Builder email: accounts@hawthorne.example
-Subject: Newstead / INV-1042 / purchase order
-Message: Please send the purchase order for the Level 02 lighting rough-in.
-```
-
-Then try an unmatched sender. The pipeline withholds customer evidence when it cannot make a unique match. Pasted email addresses are demo inputs, not authenticated identities.
-
-## Why this business?
-
-ASBFEO discusses subcontractor payment delays involving variations, and QBCC's monies-owed process requests invoices, agreements and correspondence. These findings informed a job-first interface and explicit evidence review.
-
-- [Research, sources and design decisions](DESIGN-RESEARCH.md)
-- [Architecture, API and tradeoffs](docs/ARCHITECTURE.md)
-- [Evaluation plan and production gaps](docs/EVALUATION.md)
-
-Brace Electrical, its people, builders and projects are fictional. Research is desk research, not customer validation. Amounts are before tax; the demo ledger is dated **8 October 2026**. The app does not determine legal entitlement or calculate statutory deadlines.
-
-## What is automated?
-
-```text
-Builder email
-    ↓
-Persist + deduplicate event
-    ↓
-Match sender and invoice within the demo ledger
-    ↓
-Classify query (offline rules / optional OpenAI)
-    ↓
-Retrieve invoice-scoped records + check arithmetic
-    ↓
-Human review
-    ├── complete records → edit draft → approve → local outbox
-    └── missing / conflicting records → refer with a note
-    ↓
-Audit history + manual query closure
-```
-
-The default **offline demo** uses rules for classification. It does not pretend to be a live LLM. Replies are assembled from scoped records and reviewed by a person. A model is optional because matching, arithmetic, access scope and approval should remain deterministic.
-
-## Optional OpenAI mode
-
-Set `OPENAI_API_KEY` and `OPENAI_MODEL` in your terminal environment, then run:
+The offline mode provides deterministic record checks and a clearly labelled evidence briefing. For custom questions, set `OPENAI_API_KEY` and `OPENAI_MODEL` in the terminal environment, then start:
 
 ```sh
 python3 run.py --ai
 ```
 
-Choose an available model supporting Chat Completions JSON output. `--ai` explicitly enables provider calls and their associated cost; a configured key alone does not enable them. Only the email subject and body are sent to OpenAI. Returned classifications are checked against six allowed categories. Provider failures create a retryable error state; nothing is sent to a builder.
+Choose a model available to your API project that supports Chat Completions, Responses and structured outputs. The app reads credentials on the server; it does not load `.env` files automatically or expose the key in the browser.
 
-Existing cases retain their classification. Log a new query to try the model, or use `--ai --fresh-demo` to process all six demo queries with it. Keep credentials in your environment or secret manager, never in Git. `.env` files are not loaded automatically.
+AI mode is explicitly opt-in and incurs API charges. Classification sends the email subject and body. Claim questions send the question and that claim’s scoped records to OpenAI. Existing classifications are preserved; a fresh AI-mode database also classifies the six demonstration emails.
 
-Live API calls are **not verified by the offline tests**. Reviewers do not need AI mode to test the workflow.
+Answers must pass structure and source-ID checks, but a valid citation is not proof that an interpretation is correct. Your team should review the linked records before acting. Provider errors are displayed explicitly.
 
-## Tests
+## What I propose for a pilot
+
+I would start with one accounts workflow and a small, agreed set of jobs:
+
+- **Map your process:** identify the most common builder queries, evidence sources and approval responsibilities.
+- **Connect the records:** scope mailbox, accounting and document integrations around your access controls.
+- **Run alongside your team:** compare suggested responses with the decisions staff actually make.
+- **Measure the result:** track review time, evidence completeness, corrections and time to a reviewable response.
+- **Agree the release gate:** confirm accuracy, permissions, audit requirements and operational support before enabling live delivery.
+
+This keeps the first engagement focused on a measurable operational problem.
+
+## What is working today
+
+The prototype includes a job-based claims desk, persistent SQLite data, invoice-scoped evidence, arithmetic checks, reviewed drafts, referral notes, audit history, CSV export, downloadable email drafts and optional OpenAI questions.
+
+It runs locally for one reviewer. **Live mailbox and accounting integrations, document upload, team authentication, cloud deployment and external email delivery are not implemented.** Those require a separately scoped production phase.
+
+Brace Electrical and the supplied people, builders and jobs are fictional. The demonstration uses synthetic records and a fixed ledger date of **8 October 2026**; amounts are before tax. The design is informed by published industry research, not a claimed customer deployment. It does not determine legal entitlement or statutory deadlines.
+
+## Technical review
+
+- [Business research and design rationale](DESIGN-RESEARCH.md)
+- [System design, API contracts and production roadmap](docs/SYSTEM-DESIGN.md)
+- [Architecture and implementation choices](docs/ARCHITECTURE.md)
+- [Evaluation approach and production gaps](docs/EVALUATION.md)
+- [Archify delivery receipt](docs/diagrams/delivery-receipt.json) and [visual review record](docs/diagrams/review-receipt.json)
+
+The application uses Python’s standard library, SQLite, semantic HTML, vanilla JavaScript and responsive CSS. Fonts and assets are bundled locally.
 
 ```sh
 python3 -m unittest discover -s tests -v
 ```
 
-The suite covers matching, missing evidence, variations, payment claims, duplicate intake, concurrent/stale approvals, preserved state, HTTP protections and launcher options. Tests use temporary databases and make no provider calls.
+Tests cover matching, evidence boundaries, arithmetic, duplicate intake, concurrent approvals, HTTP protections and assistant response validation. Provider responses are mocked; these tests do not establish live model quality. GitHub Actions is configured for Linux, macOS and Windows with Python 3.10 and 3.13, plus JavaScript syntax checking.
 
-GitHub Actions is configured for Linux, macOS and Windows with Python 3.10 and 3.13, plus a JavaScript syntax check. These CI targets are not a claim that every platform was tested locally.
-
-## Implementation and boundaries
-
-- Python standard library + SQLite; semantic HTML, vanilla JavaScript and responsive CSS.
-- Locally hosted Manrope and Space Grotesk fonts. No runtime package dependencies.
-- Loopback-only, one local reviewer, synthetic records. No telemetry or external requests in default demo mode.
-- No live accounting, mailbox, PDF upload, external mail, team authentication or background scheduler is connected.
-- Escalations are local tasks. Closing a query does not mark the invoice paid.
-
-This is a tested local prototype, not an internet-facing production service. Font licenses are in `static/fonts/`. The source is shared for review; no blanket open-source license has been assigned.
-
-## Ask the job file
-
-Each claim now has an **Ask the file** tab. It can explain discrepancies, identify missing evidence and prepare project-manager handovers with source links.
-
-The default mode shows a clearly labelled deterministic briefing. To enable custom OpenAI answers, configure `OPENAI_API_KEY` and `OPENAI_MODEL` in your terminal environment, then run:
-
-```bash
-python run.py --ai
-```
-
-Use a model available to your API project that supports Chat Completions, Responses and structured outputs. Credentials are read from environment variables, not from a browser form or an automatically loaded .env file. Keep keys out of Git and chat. API calls are billable; a fresh AI-mode database also classifies the six seed emails. Existing processed cases are preserved.
-
-The assistant sends your question and the selected claim’s records to OpenAI. It has no action tools. Citations open source snapshots; check them before using an answer. Provider failures show an explicit error. Offline operation remains available without a key.
-
-- [System design document](docs/SYSTEM-DESIGN.md)
-- [Interactive Archify workflow](docs/diagrams/claim-workflow.html) — download and open in a browser, or use **Workspace guide → Explore the interactive workflow** while running locally.
-- [Diagram delivery receipt](docs/diagrams/delivery-receipt.json)
-
-AI integration tests mock provider responses. Live model quality has not been verified without locally configured credentials.
+Font licenses are included in `static/fonts/`. No blanket open-source license has been assigned.

@@ -1,13 +1,13 @@
 {
   "diagram_type": "workflow",
-  "artifact_sha256": "7ef5f34aa75e0731502ddf40a66213273eac5ad574a9e408f649ed0f71a7b6b6",
-  "artifact_bytes": 807749,
-  "specification_sha256": "0478b3d744b3194faa3af1ac3772399d6478c2538b9e2afd16a08242f2a4687d",
+  "artifact_sha256": "aee8832870daa4751d17126b790f2d8a7b7d87d5baac3aad5a5ff85c3c7fd3d6",
+  "artifact_bytes": 807747,
+  "specification_sha256": "19db3833face5a8041ce1dcd26289786186324d25618fff0119e9a83bdd7deb3",
   "validation": "9/9 showcase, 0 errors, 0 warnings",
   "browser_evidence": "skipped",
   "browser_evidence_reason": "Packaged visual-check could not find Chrome/Chromium.",
   "visual_review": "passed",
-  "correction_rounds": 1,
+  "correction_rounds": 2,
   "manual_review": {
     "surface": "Codex in-app browser",
     "state": "default READ / still",
@@ -38,9 +38,9 @@
       }
     ],
     "themes_inspected": [
-      "light at 1440x900 and 2048x1320",
-      "dark at 1440x900 and 2048x1320"
+      "light at 1600x1000 and 2048x1320",
+      "dark at 2048x1320"
     ],
-    "observations": "Both lanes, labels, arrows and conclusion cards visible without page overflow. No crossing routes or overlapping labels; main diagram remains readable at both endpoint sizes. Theme switching verified. Manual review does not replace automated browser evidence."
+    "observations": "Wider cards separate semantic icons from centered headings. No icon/text overlap. Four exact desktop viewport measurements passed containment. Light and dark visually reviewed. Manual review does not replace automated browser evidence."
   }
 }
