@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Brace Electrical's commercial claims desk. Review site records, resolve invoice blockers and prepare builder correspondence."
+    />
+    <title>Claims desk — Brace Electrical</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="preload"
+      href="/fonts/SpaceGrotesk-Bold.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to claims desk</a>
+    <div class="app-shell">
+      <header class="masthead">
+        <a href="/" class="brand" aria-label="Brace Electrical home"
+          ><span class="brand-mark" aria-hidden="true"><i></i><i></i></span
+          ><span class="wordmark">BRACE<span>ELECTRICAL</span></span></a
+        >
+        <div class="division">
+          Commercial & industrial<span>Brisbane / South East Queensland</span>
+        </div>
+        <div class="header-right">
+          <span class="demo-label">Concept workspace</span>
+          <div class="profile">
+            <span class="avatar">KE</span>
+            <div>Kate Ellis<small>Accounts & contracts</small></div>
+          </div>
+        </div>
+      </header>
+      <nav class="navigation" aria-label="Workspace">
+        <div class="nav-group">
+          <button class="nav active" data-view="cases">
+            Claims desk <span id="nav-count">—</span></button
+          ><button class="nav" data-view="projects">Job register</button
+          ><button class="nav" data-view="outbox">
+            Approved replies <span id="outbox-count">0</span></button
+          ><button class="nav" data-view="activity">Activity</button>
+        </div>
+        <button class="nav setup-nav" data-view="about">
+          Workspace guide <span aria-hidden="true">↗</span>
+        </button>
+      </nav>
+      <main id="main">
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">
+              <span class="date-line">OCTOBER 2026</span
+              ><span>ACCOUNTS / 01</span>
+            </div>
+            <h1 id="page-title">Work done. <span>Payment pending.</span></h1>
+            <p id="page-subtitle">
+              The paperwork between a finished job and a paid invoice.
+            </p>
+          </div>
+          <div class="heading-actions">
+            <button class="button primary" id="new-case">
+              Log builder query
+              <span class="button-icon" aria-hidden="true">+</span>
+            </button>
+            <div class="snapshot">Demo ledger as at <b>08 Oct 2026</b></div>
+          </div>
+        </section>
+        <div id="error" role="alert" hidden></div>
+        <div id="notice" role="status" hidden></div>
+        <div id="loading" class="loading-bar" role="status" hidden>
+          Checking the job ledger and supporting records…
+        </div>
+        <section id="metrics" class="metrics" aria-label="Claims summary">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </section>
+        <section id="case-view">
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Claim register</h2>
+              <span id="register-count" class="count-label"></span>
+            </div>
+            <button id="export" class="text-button">
+              Export register <span aria-hidden="true">↓</span>
+            </button>
+          </div>
+          <div class="toolbar">
+            <div class="tabs" role="group" aria-label="Filter claims">
+              <button class="tab active" data-filter="all">All open</button
+              ><button class="tab" data-filter="blocked">Needs evidence</button
+              ><button class="tab" data-filter="review">Ready to reply</button
+              ><button class="tab" data-filter="resolved">Closed</button>
+            </div>
+            <div class="search-wrap">
+              <span aria-hidden="true">⌕</span
+              ><input
+                id="search"
+                type="search"
+                placeholder="Find a job, builder or invoice"
+                aria-label="Search claims"
+              /><kbd>/</kbd>
+            </div>
+          </div>
+          <div class="workbench">
+            <section class="register" aria-label="Claims">
+              <div class="register-head">
+                <span>Job / builder</span><span>Holding up payment</span
+                ><span>Claim value</span><span></span>
+              </div>
+              <div id="case-list" class="case-list"></div>
+              <div class="register-footer">
+                <span id="list-caption">Loading claims…</span
+                ><span>All amounts AUD</span>
+              </div>
+              <aside id="attention-note" class="attention-note"></aside>
+            </section>
+            <div class="dossier-shell">
+              <article
+                id="detail"
+                class="detail"
+                aria-label="Selected claim"
+              ></article>
+            </div>
+          </div>
+        </section>
+        <section id="secondary-view" hidden></section>
+      </main>
+      <footer>
+        <div class="footer-brand">BRACE <span>BUILT ON GOOD WORK.</span></div>
+        <div>
+          Fictional business · Synthetic job records · No external emails sent
+        </div>
+        <button id="seed" class="text-button">Load missing demo queries</button>
+      </footer>
+    </div>
+    <dialog id="new-dialog" aria-labelledby="intake-title">
+      <form id="intake-form">
+        <div class="dialog-heading">
+          <span class="eyebrow">BUILDER CORRESPONDENCE</span
+          ><button
+            type="button"
+            class="close"
+            id="close-dialog"
+            aria-label="Close dialog"
+          >
+            ×
+          </button>
+        </div>
+        <h2 id="intake-title">What’s holding up<br />the claim?</h2>
+        <p>
+          Log the builder’s email. We’ll match the job and pull together the
+          supporting records.
+        </p>
+        <label
+          >Builder email<input
+            type="email"
+            name="sender"
+            required
+            placeholder="finance@alder.example" /></label
+        ><label
+          >Email subject<input
+            name="subject"
+            required
+            maxlength="300"
+            placeholder="Woolloongabba / INV-1043 / labour query" /></label
+        ><label
+          >Builder’s message<textarea
+            name="body"
+            required
+            maxlength="20000"
+            rows="5"
+            placeholder="Paste the message here…"
+          ></textarea>
+        </label>
+        <details class="demo-help">
+          <summary>Use a demo builder account</summary>
+          <p>
+            Alder Build: finance@alder.example · INV-1043 / INV-1047<br />Hawthorne:
+            accounts@hawthorne.example · INV-1042 / INV-1046<br />Mason & Reed:
+            billing@masonreed.example · INV-1044<br />Westhaven:
+            ap@westhaven.example · INV-1045
+          </p>
+        </details>
+        <div id="intake-error" class="inline-error" role="alert" hidden></div>
+        <button class="button primary" type="submit">
+          Match job & check records
+          <span class="button-icon" aria-hidden="true">↗</span>
+        </button>
+      </form>
+    </dialog>
+    <dialog id="document-dialog" aria-labelledby="document-title">
+      <div class="dialog-heading">
+        <span class="eyebrow">JOB RECORD / SYNTHETIC</span
+        ><button class="close" id="close-document" aria-label="Close record">
+          ×
+        </button>
+      </div>
+      <div id="document-content"></div>
+    </dialog>
+  </body>
+</html>

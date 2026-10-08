@@ -1,0 +1,6 @@
+[project]
+name = "brace-electrical"
+version = "0.1.0"
+description = "A business-specific invoice dispute and evidence review prototype for an electrical subcontractor."
+requires-python = ">=3.10"
+dependencies = []
